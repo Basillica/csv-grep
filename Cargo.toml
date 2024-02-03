@@ -14,3 +14,4 @@ unicode-segmentation = "1.10"
 unicode-width = "0.1"
 strum = { version = "0.26", features = ["derive"] }
 color-eyre = "0.6.2"
+csv = "1.3.0"

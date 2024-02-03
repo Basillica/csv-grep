@@ -42,6 +42,7 @@ pub fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: models::App) -> io::Result<()> {
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
@@ -55,8 +56,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: models::App) -> io::
                     Char('k') | Up => app.previous(),
                     Char('l') | Right => app.next_color(),
                     Char('h') | Left => app.previous_color(),
-                    Char('t') | Enter => app.previous_color(),
-                    Char('b') | BackTab => app.previous_color(),
+                    Char('t') | Enter => app.next_menu(),
+                    Char('b') | BackTab => app.previous_menu(),
                     _ => {}
                 }
             }
@@ -64,16 +65,59 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: models::App) -> io::
     }
 }
 
+
 pub fn ui(f: &mut Frame, app: &mut models::App) {
-    let rects = Layout::vertical([Constraint::Min(5), Constraint::Length(3)]).split(f.size());
+    let outer_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(vec![
+            Constraint::Percentage(10),
+            Constraint::Percentage(80),
+            Constraint::Percentage(10),
+        ])
+        .split(f.size());
+
+    let inner_layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(vec![
+            Constraint::Percentage(20),
+            Constraint::Percentage(1),
+            Constraint::Percentage(79),
+        ])
+        .split(outer_layout[1]);
+    
+
+    f.render_widget(
+        Paragraph::new("CSV Parser").style(Style::new().fg(app.colors.row_fg).bg(app.colors.buffer_bg))
+            .centered()
+            .block(Block::new().borders(Borders::ALL)
+            .border_style(Style::new().fg(app.colors.footer_border_color))
+            .border_type(BorderType::Double)),
+        outer_layout[0]);
+
+    f.render_widget(
+        Paragraph::new("")
+            .block(Block::new().borders(Borders::ALL)),
+            inner_layout[1]);
 
     app.set_colors();
 
-    render_table(f, app, rects[0]);
-
-    render_scrollbar(f, app, rects[0]);
-
-    render_footer(f, app, rects[1]);
+    // right side
+    match app.tab {
+        "Data Explorer" => {
+            render_table(f, app, inner_layout[2]);
+            render_scrollbar(f, app, inner_layout[2]);
+        },
+        "Visualization" => {},
+        "Statistics" => {},
+        "Extras" => {},
+        _ => {}
+    }
+    
+    // left side
+    render_menu_items(f, app, inner_layout[0]);
+    render_menu_scrollbar(f, app, inner_layout[0]);
+    // footer
+    render_footer(f, app, outer_layout[2]);
 }
 
 
@@ -85,35 +129,39 @@ fn render_table(f: &mut Frame, app: &mut models::App, area: Rect) {
         .add_modifier(Modifier::REVERSED)
         .fg(app.colors.selected_style_fg);
 
-    let header = ["Name", "Address", "Email"]
+    let header = app.table_header
         .iter()
         .cloned()
         .map(Cell::from)
         .collect::<Row>()
         .style(header_style)
         .height(2);
+
     let rows = app.items.iter().enumerate().map(|(i, data)| {
         let color = match i % 2 {
             0 => app.colors.normal_row_color,
             _ => app.colors.alt_row_color,
         };
-        let item = data.ref_array();
+
+        let item: Vec<&str> = data.iter().collect();
         item.iter()
             .cloned()
             .map(|content| Cell::from(Text::from(format!("\n{}\n", content))))
             .collect::<Row>()
             .style(Style::new().fg(app.colors.row_fg).bg(color))
-            .height(4)
+            .height(2)
     });
-    let bar = " █ ";
+    let bar = "⮞ ";
+    let mut width: Vec<Constraint> = [].to_vec();
+    let space = 100/app.table_header.len();
+    for (_, _) in app.table_header.iter().enumerate() {
+        width.push(Constraint::Percentage(space as u16))
+    }
+
+
     let t = Table::new(
         rows,
-        [
-            // + 1 is for padding.
-            Constraint::Length(app.longest_item_lens.0 + 1),
-            Constraint::Min(app.longest_item_lens.1 + 1),
-            Constraint::Min(app.longest_item_lens.2),
-        ],
+        width,
     )
     .header(header)
     .highlight_style(selected_style)
@@ -125,8 +173,9 @@ fn render_table(f: &mut Frame, app: &mut models::App, area: Rect) {
     ]))
     .bg(app.colors.buffer_bg)
     .highlight_spacing(HighlightSpacing::Always);
-    f.render_stateful_widget(t, area, &mut app.state);
+    f.render_stateful_widget(t, area, &mut app.app_state);
 }
+
 
 fn render_scrollbar(f: &mut Frame, app: &mut models::App, area: Rect) {
     f.render_stateful_widget(
@@ -141,6 +190,75 @@ fn render_scrollbar(f: &mut Frame, app: &mut models::App, area: Rect) {
         &mut app.scroll_state,
     );
 }
+
+
+fn render_menu_items(f: &mut Frame, app: &mut models::App, area: Rect) {
+    let header_style = Style::default()
+        .fg(app.colors.header_fg)
+        .bg(app.colors.header_bg);
+    let selected_style = Style::default()
+        .add_modifier(Modifier::REVERSED)
+        .fg(app.colors.selected_style_fg);
+
+    let header = ["Menu"]
+        .iter()
+        .cloned()
+        .map(Cell::from)
+        .collect::<Row>()
+        .style(header_style)
+        .height(2);
+    let rows = app.menu_items.iter().enumerate().map(|(i, data)| {
+        let color = match i % 2 {
+            0 => app.colors.normal_row_color,
+            _ => app.colors.alt_row_color,
+        };
+        let item = [data];
+        // let item = data.ref_array();
+        item.iter()
+            .cloned()
+            .map(|content| Cell::from(Text::from(format!("\n{}\n", content))))
+            .collect::<Row>()
+            .style(Style::new().fg(app.colors.row_fg).bg(color))
+            .height(4)
+    });
+    let bar = " █ ";
+    let t = Table::new(
+        rows,
+        [
+            // + 1 is for padding.
+            Constraint::Length(app.longest_menu_item_len),
+            // Constraint::Min(app.longest_item_lens.1 + 1),
+            // Constraint::Min(app.longest_item_lens.2),
+        ],
+    )
+    .header(header)
+    .highlight_style(selected_style)
+    .highlight_symbol(Text::from(vec![
+        "".into(),
+        bar.into(),
+        bar.into(),
+        "".into(),
+    ]))
+    .bg(app.colors.buffer_bg)
+    .highlight_spacing(HighlightSpacing::Always);
+    f.render_stateful_widget(t, area, &mut app.menu_state);
+}
+
+
+fn render_menu_scrollbar(f: &mut Frame, app: &mut models::App, area: Rect) {
+    f.render_stateful_widget(
+        Scrollbar::default()
+            .orientation(ScrollbarOrientation::VerticalRight)
+            .begin_symbol(None)
+            .end_symbol(None),
+        area.inner(&Margin {
+            vertical: 1,
+            horizontal: 1,
+        }),
+        &mut app.menu_scroll_state,
+    );
+}
+
 
 fn render_footer(f: &mut Frame, app: &mut models::App, area: Rect) {
     let info_footer = Paragraph::new(Line::from(INFO_TEXT))

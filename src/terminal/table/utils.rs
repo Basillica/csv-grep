@@ -1,53 +1,26 @@
-use crate::terminal::table::models::*;
-use itertools::Itertools;
 use unicode_width::UnicodeWidthStr;
+use csv::StringRecord;
 
-pub fn generate_fake_names() -> Vec<Data> {
-    use fakeit::{address, contact, name};
 
-    (0..20)
-        .map(|_| {
-            let name = name::full();
-            let address = format!(
-                "{}\n{}, {} {}",
-                address::street(),
-                address::city(),
-                address::state(),
-                address::zip()
-            );
-            let email = contact::email();
+pub fn constraint_len_calculator(items: &[StringRecord]) -> Vec<u16> {
+    let mut res: Vec<u16> = [].to_vec();
+    for item in items {
+        let vals = item.iter()
+            .map(|v| UnicodeWidthStr::width(v))
+            .max()
+            .unwrap_or(0);
 
-            Data {
-                name,
-                address,
-                email,
-            }
-        })
-        .sorted_by(|a, b| a.name.cmp(&b.name))
-        .collect_vec()
+        res.push(vals as u16)
+    }
+    res
 }
 
-
-pub fn constraint_len_calculator(items: &[Data]) -> (u16, u16, u16) {
+pub fn menu_item_len_calculator(items: &[String]) -> u16 {
     let name_len = items
         .iter()
-        .map(Data::name)
-        .map(UnicodeWidthStr::width)
-        .max()
-        .unwrap_or(0);
-    let address_len = items
-        .iter()
-        .map(Data::address)
-        .flat_map(str::lines)
-        .map(UnicodeWidthStr::width)
-        .max()
-        .unwrap_or(0);
-    let email_len = items
-        .iter()
-        .map(Data::email)
-        .map(UnicodeWidthStr::width)
+        .map(|s| UnicodeWidthStr::width(s.as_str()))
         .max()
         .unwrap_or(0);
 
-    (name_len as u16, address_len as u16, email_len as u16)
+    name_len as u16
 }

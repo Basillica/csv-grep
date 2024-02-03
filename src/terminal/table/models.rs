@@ -1,7 +1,8 @@
 use style::palette::tailwind;
 use ratatui::{prelude::*, widgets::*};
 use crate::terminal::table::utils::*;
-
+use csv::{ReaderBuilder, StringRecord};
+use std::fs::File;
 
 const PALETTES: [tailwind::Palette; 4] = [
     tailwind::BLUE,
@@ -9,8 +10,6 @@ const PALETTES: [tailwind::Palette; 4] = [
     tailwind::INDIGO,
     tailwind::RED,
 ];
-const INFO_TEXT: &str =
-    "(Esc) quit | (↑) move up | (↓) move down | (→) next color | (←) previous color";
 
 const ITEM_HEIGHT: usize = 4;
 
@@ -40,55 +39,84 @@ impl TableColors {
     }
 }
 
-pub struct Data {
-    pub name: String,
-    pub address: String,
-    pub email: String,
-}
-
-
-impl Data {
-    pub fn ref_array(&self) -> [&String; 3] {
-        [&self.name, &self.address, &self.email]
-    }
-
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    pub fn address(&self) -> &str {
-        &self.address
-    }
-
-    pub fn email(&self) -> &str {
-        &self.email
-    }
-}
-
-pub struct App {
-    pub state: TableState,
-    pub items: Vec<Data>,
-    pub longest_item_lens: (u16, u16, u16), // order is (name, address, email)
+pub struct App<'a> {
+    // menu props
+    pub menu_state: TableState,
+    pub menu_items: Vec<String>,
+    pub menu_scroll_state: ScrollbarState,
+    pub longest_menu_item_len: u16,
+    // app state
+    pub app_state: TableState,
+    pub items: Vec<StringRecord>,
+    pub longest_item_lens: Vec<u16>, // order is (name, address, email)
     pub scroll_state: ScrollbarState,
     pub colors: TableColors,
     pub color_index: usize,
+    pub table_header: Vec<String>,
+    pub tab: &'a str,
 }
 
 
-impl App {
-    pub fn new() -> App {
-        let data_vec = generate_fake_names();
+impl<'a> App<'a> {
+    pub fn new() -> App<'a> {
+        // let data_vec = generate_fake_names();
+        let (headers, vals) = get_attrs();
+        let menu_items = vec!["Data Explorere".to_string(), "Visualization".to_string(), "Statistics".to_string(), "Extras".to_string()];
         App {
-            state: TableState::default().with_selected(0),
-            longest_item_lens: constraint_len_calculator(&data_vec),
-            scroll_state: ScrollbarState::new((data_vec.len() - 1) * ITEM_HEIGHT),
+            menu_state: TableState::default().with_selected(0),
+            menu_items: menu_items.clone(),
+            menu_scroll_state: ScrollbarState::new((menu_items.len() - 1) * ITEM_HEIGHT),
+            longest_menu_item_len: menu_item_len_calculator(&menu_items),
+            app_state: TableState::default().with_selected(0),
+            longest_item_lens: constraint_len_calculator(&vals),
+            scroll_state: ScrollbarState::new((vals.len() - 1) * ITEM_HEIGHT),
             colors: TableColors::new(&PALETTES[0]),
             color_index: 0,
-            items: data_vec,
+            items: vals,
+            table_header: headers,
+            tab: "Data Explorer",
         }
     }
+
+    fn get_menu_items(&self) -> Vec<&'a str> {
+        let menu_items: Vec<&'a str> = vec!["Data Explorer", "Visualization", "Statistics", "Extras"];
+        menu_items
+    }
+
+    pub fn next_menu(&mut self) {
+        let i = match self.menu_state.selected() {
+            Some(i) => {
+                if i >= self.menu_items.len() - 1 {
+                    0
+                } else {
+                    i + 1
+                }
+            }
+            None => 0,
+        };
+        self.menu_state.select(Some(i));
+        self.menu_scroll_state = self.menu_scroll_state.position(i * ITEM_HEIGHT);
+        self.tab = self.get_menu_items()[i];
+    }
+
+    pub fn previous_menu(&mut self) {
+        let i = match self.menu_state.selected() {
+            Some(i) => {
+                if i == 0 {
+                    self.menu_items.len() - 1
+                } else {
+                    i - 1
+                }
+            }
+            None => 0,
+        };
+        self.menu_state.select(Some(i));
+        self.menu_scroll_state = self.menu_scroll_state.position(i * ITEM_HEIGHT);
+        self.tab = self.get_menu_items()[i]
+    }
+
     pub fn next(&mut self) {
-        let i = match self.state.selected() {
+        let i = match self.app_state.selected() {
             Some(i) => {
                 if i >= self.items.len() - 1 {
                     0
@@ -98,12 +126,12 @@ impl App {
             }
             None => 0,
         };
-        self.state.select(Some(i));
+        self.app_state.select(Some(i));
         self.scroll_state = self.scroll_state.position(i * ITEM_HEIGHT);
     }
 
     pub fn previous(&mut self) {
-        let i = match self.state.selected() {
+        let i = match self.app_state.selected() {
             Some(i) => {
                 if i == 0 {
                     self.items.len() - 1
@@ -113,7 +141,7 @@ impl App {
             }
             None => 0,
         };
-        self.state.select(Some(i));
+        self.app_state.select(Some(i));
         self.scroll_state = self.scroll_state.position(i * ITEM_HEIGHT);
     }
 
@@ -129,4 +157,21 @@ impl App {
     pub fn set_colors(&mut self) {
         self.colors = TableColors::new(&PALETTES[self.color_index])
     }
+}
+
+
+fn get_attrs() -> (Vec<String>, Vec<StringRecord>) {
+    let file = File::open("username.csv").expect("file does not exist");
+    let mut rdr = ReaderBuilder::new().from_reader(file);
+    let headers: Vec<String> = rdr.headers().expect("could not read headers from csv files").iter().map(|s| s.to_string()).collect::<Vec<String>>();
+    let headers: Vec<String> = headers.iter().map(|s| s.to_string()).collect();
+    println!("{:?}, {}", headers, headers.len());
+    let mut records: Vec<StringRecord> = [].to_vec();
+    for result in rdr.records() {
+        match result {
+            Ok(v) => records.push(v),
+            Err(_) => continue,
+        };
+    };
+    (headers, records)
 }

@@ -1,19 +1,15 @@
+use color_eyre::eyre::Ok;
 use color_eyre:: Result;
-use terminal::{
-    app::models, utils
-};
 use std::error::Error;
+use std::fs::File;
+use csv::ReaderBuilder;
 
+use terminal::utils::create_struct;
 
 mod terminal;
 
 
-fn main() -> Result<(), Box<dyn Error>> {
-    utils::init_error_hooks()?;
-    let mut terminal = utils::init_terminal()?;
-    models::App::default().run(&mut terminal)?;
-    utils::restore_terminal()?;
-    Ok(())
 
-    // terminal::table::main::main()
+fn main() -> Result<(), Box<dyn Error>> {
+    terminal::table::main::main()
 }
