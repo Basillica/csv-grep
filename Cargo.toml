@@ -2,6 +2,23 @@
 name = "csv-grep"
 version = "0.1.0"
 edition = "2021"
+authors = ["Ezeabasili Anthony <ezeabasilianthony@gmail.com>"]
+description = "A library for quick glance at csv data right from the terminal"
+documentation = ""
+keywords = ["tui", "terminal", "csv", "analysis", "data"]
+repository = ""
+readme = "README.md"
+license = "MIT"
+exclude = [
+  "assets/*",
+  ".github",
+  "Makefile.toml",
+  "CONTRIBUTING.md",
+  "*.log",
+  "tags",
+]
+autoexamples = true
+rust-version = "1.70.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

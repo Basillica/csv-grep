@@ -483,14 +483,14 @@ pub fn render_scatter(f: &mut Frame, app: &mut models::App, area: Rect) {
         )
         .x_axis(
             Axis::default()
-                .title("Year")
+                .title("X Axis")
                 .bounds([min_x-10.0, max_x+10.0])
                 .style(Style::default().fg(Color::Gray))
                 .labels(vec![format!("{min_x}").into(), format!("{max_x}").into()]),
         )
         .y_axis(
             Axis::default()
-                .title("Cost")
+                .title("Y Axis")
                 .bounds([min_y-10.0, max_y+10.0])
                 .style(Style::default().fg(Color::Gray))
                 .labels(vec![format!("{min_y}").into(), format!("{max_y}").into()]),
