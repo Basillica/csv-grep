@@ -1,23 +1,101 @@
-Username, Identifier,First name,Last name, age
-booker12,45,Rachel,Booker,34
-grey07,32,Laura,Grey,45
-johnson81,23,Craig,Johnson,34
-jenkins46,23,Mary,Jenkins, 554
-smith79,4,Jamie,Smith,23
-booker12,4,Rachel,Booker, 34
-booker12,5,Rachel,Booker,45
-grey07,8,Laura,Grey,45
-johnson81,78,Craig,Johnson,787
-jenkins46,0,Mary,Jenkins, 878
-smith79,8,Jamie,Smith,78
-booker12,98,Rachel,Booker, 78
-booker12,67,Rachel,Booker,6
-grey07,45,Laura,Grey,67
-johnson81,67,Craig,Johnson,6
-jenkins46,89,Mary,Jenkins, 45
-smith79,8,Jamie,Smith,34
-booker12,67,Rachel,Booker, 5
-booker12,54,Rachel,Booker,34
-grey07,232,Laura,Grey,65
-johnson81,332,Craig,Johnson,5
-jenkins46,4,Mary,Jenkins, 67
+seq,name/first,name/last,age,street,city,state,zip,amout,pick,date
+1,Jeff,Chambers,26,Wonu Highway,Gijjeci,CA,06675,2213.50,GREEN,04/27/1901
+2,Shawn,Dunn,36,Zakho Place,Komunjos,AL,07265,9936.34,BLUE,06/27/1988
+3,Terry,Hines,22,Camu Avenue,Gifhulluz,WV,50480,1473.47,RED,02/01/1927
+4,Leona,Sanchez,37,Ihfic Heights,Puloih,NM,20263,8269.54,BLUE,11/14/1923
+5,Dylan,Rodriquez,30,Vuwgu Road,Tottege,IA,13019,4233.30,YELLOW,10/03/1915
+6,Della,Robertson,27,Catpa Junction,Nucuthu,ME,34611,3749.50,GREEN,01/12/2008
+7,Rosa,Haynes,61,Curga Center,Wizbenku,MI,28530,4713.25,WHITE,05/12/1989
+8,Fanny,Harris,52,Kihog Terrace,Immajkib,WA,55994,528.80,WHITE,07/01/1965
+9,Danny,Ramos,55,Hejre Way,Jammojof,MO,32225,7232.13,WHITE,06/22/1936
+10,Austin,Cunningham,62,Bepude Center,Hozzekoh,NH,84135,8693.21,GREEN,02/25/2038
+11,Alex,Richards,63,Govu Grove,Ruajojov,IL,83179,7015.34,BLUE,06/02/2055
+12,Thomas,Rodriquez,52,Likoh Point,Romufe,MA,65520,6572.31,WHITE,03/26/1914
+13,Eunice,Sherman,32,Lozrot Road,Iluciur,NH,64041,9876.50,RED,10/31/1949
+14,Clyde,Garrett,51,Bihjo Drive,Sahoziuh,NY,60048,744.25,RED,09/02/1942
+15,Lily,Roy,43,Gafi Trail,Jodvaeta,WI,67250,8856.17,GREEN,09/25/1951
+16,Jim,Harper,53,Cetwi Park,Tibloftaf,OH,93861,6377.71,YELLOW,06/20/1976
+17,Arthur,Soto,48,Zauto Park,Katogce,MT,79539,6425.25,BLUE,07/23/2042
+18,Rosetta,Vaughn,56,Ojuzev Mill,Enacajku,NJ,94973,5478.05,RED,09/18/2060
+19,Lucinda,Bass,49,Ejiget Street,Suraihi,AK,26690,1042.72,WHITE,09/10/2009
+20,Verna,Gross,52,Wuviw Path,Woscous,NV,84069,1143.06,RED,07/03/2033
+21,Eula,Hart,43,Ovnen Ridge,Fukpunu,IA,39104,949.87,GREEN,12/21/1992
+22,Ada,Little,49,Liru Parkway,Vofbaeko,MS,93802,3820.54,YELLOW,12/19/2026
+23,Ann,Sharp,57,Geisa Road,Zirlerhu,WI,75204,1640.75,YELLOW,05/17/1965
+24,Hunter,Drake,43,Vefa Court,Wezcijred,FL,80946,4676.53,WHITE,09/10/2070
+25,Kevin,Yates,44,Doig Heights,Sujlewid,DE,76469,9671.37,WHITE,11/21/1949
+26,Dollie,Valdez,30,Coacu Terrace,Linonmif,MO,60542,6771.56,GREEN,10/22/1906
+27,Lula,Clarke,25,Webu Street,Wosudda,MA,32299,5309.60,WHITE,10/08/1926
+28,Eugene,Griffin,52,Sudi Parkway,Zintibnu,OK,83666,2590.69,BLUE,02/14/1967
+29,Andre,White,55,Enezam Junction,Puvajji,OH,54877,8945.30,RED,08/29/2056
+30,Lucille,Hines,52,Dugvaw Manor,Powcatzut,CA,23208,7689.95,WHITE,12/03/2036
+31,Virgie,Barber,29,Esioc Way,Uzarivuf,ID,74662,185.74,GREEN,09/09/1998
+32,Martin,Bradley,29,Tuton Street,Ipuecuw,VA,81688,7311.21,RED,04/08/2017
+33,Clayton,Snyder,43,Heeso Key,Junidtor,OH,07967,9824.54,WHITE,05/11/1944
+34,Maria,Wade,37,Kuobu Pass,Woevpo,CO,60534,7299.86,YELLOW,04/29/2063
+35,Ada,Hudson,32,Alanig Extension,Vavaic,CA,20470,3430.93,RED,08/17/2010
+36,Cornelia,Moran,51,Kafudo Circle,Muhutovam,WY,36772,3265.43,BLUE,01/17/2009
+37,Micheal,Summers,19,Afuko Mill,Onuazwal,MT,40765,9505.51,BLUE,06/14/2060
+38,Ida,Lyons,65,Atfec Street,Viplajor,OR,90834,7894.69,RED,02/14/1994
+39,Kevin,Andrews,33,Vuwa Lane,Jipoote,MD,86179,124.87,YELLOW,06/05/2061
+40,Arthur,Curtis,56,Bovsun Junction,Gushuszib,SC,31130,6930.11,GREEN,10/17/1919
+41,Luke,Dennis,22,Govwi Path,Ranzasfi,MA,55333,7054.26,GREEN,09/18/1915
+42,Marie,Sparks,55,Fize Pass,Ditgahis,NM,77811,1983.66,YELLOW,12/20/2009
+43,Etta,McKenzie,64,Cuhwi Street,Wehfokij,MA,94738,1549.47,GREEN,07/17/2023
+44,Winifred,Hodges,35,Mimde Manor,Ucocjev,DE,56204,3579.65,WHITE,03/24/1959
+45,Callie,King,55,Ugrab Boulevard,Zatitru,TN,72841,6220.36,YELLOW,06/08/2024
+46,Albert,Greer,43,Wagud Key,Masvezun,KS,89147,451.73,WHITE,06/16/1966
+47,Hunter,Garza,37,Ivunu Pass,Regpofen,MD,17847,199.85,RED,08/10/2025
+48,Philip,Greene,24,Amowe Extension,Jamrede,TX,52367,8200.15,BLUE,02/21/2029
+49,Max,Hanson,59,Ebeva Turnpike,Gurohtuj,OK,16570,2705.33,RED,10/09/1923
+50,Edith,Lopez,64,Tokvi Trail,Uhavahger,CO,61937,8079.99,BLUE,08/30/2052
+51,Nathan,Myers,35,Desu Center,Varilumis,SD,40621,5854.85,WHITE,11/12/1916
+52,Albert,Moreno,62,Guzij River,Catuglij,MD,77926,8416.05,RED,03/23/1907
+53,Virgie,Lopez,51,Ufido Place,Kovezhif,MI,18579,1449.73,BLUE,10/06/1989
+54,Clyde,Christensen,64,Mujo Road,Moivkab,SC,83949,5063.59,YELLOW,09/14/1906
+55,Ernest,Freeman,35,Ziur Loop,Ajuneze,AZ,62806,9886.42,BLUE,01/04/2005
+56,May,Cohen,28,Tibvav Drive,Vapzinwej,MT,18617,256.47,BLUE,11/11/2022
+57,Betty,Pratt,49,Zuhi Way,Permored,SC,97063,6319.55,WHITE,06/09/2055
+58,Rena,Webb,42,Telak Drive,Tilenmun,DC,24933,489.61,GREEN,06/16/2012
+59,Wesley,Goodwin,48,Fujba Lane,Netnusol,MD,15308,9958.06,YELLOW,07/07/2006
+60,Rosa,Hoffman,30,Unedim Boulevard,Siopuiko,WV,90051,4850.25,BLUE,09/06/2049
+61,Luella,Roy,39,Omnoc Grove,Evcowkew,NE,82275,3067.43,GREEN,04/13/1935
+62,Clara,Austin,44,Tirco Path,Coggihah,HI,18892,9358.39,BLUE,06/09/1958
+63,Teresa,Guerrero,43,Wizni Plaza,Sevilece,MO,03733,5901.12,YELLOW,01/29/2019
+64,Viola,Reynolds,22,Cocow Key,Copconupi,MA,17503,8456.22,WHITE,03/05/1958
+65,Eddie,Craig,38,Ikipot Path,Sovniuz,NH,75002,5437.38,WHITE,09/28/2052
+66,Jim,Mendoza,26,Suet Center,Suffempor,MD,22711,8220.59,YELLOW,11/06/1949
+67,Russell,Carter,62,Cuzi Point,Urzuvce,MS,69785,704.09,GREEN,01/14/1951
+68,Julia,Padilla,56,Zaceb Pass,Jussoeru,IA,81573,3074.39,YELLOW,03/05/1977
+69,Ora,Hoffman,61,Caic Mill,Jedazo,ID,78782,2704.15,YELLOW,01/05/1921
+70,Irene,Gardner,29,Olamic Glen,Locjirsa,UT,80232,436.68,GREEN,02/04/1945
+71,Roy,Conner,64,Zeiw River,Vopizve,DC,34800,1414.89,GREEN,06/27/2035
+72,Alan,Ramos,65,Decbe Pike,Iflaru,ND,78960,5924.35,YELLOW,07/31/2055
+73,Leon,Henderson,42,Cejbuf Point,Caejato,MO,67300,8395.88,GREEN,05/28/1944
+74,Allie,Roy,35,Tevoma Turnpike,Kunzimuj,CA,80131,8525.24,GREEN,08/01/1911
+75,Emma,Davidson,48,Dohi Lane,Nuohepu,AK,94839,1519.62,GREEN,06/07/1971
+76,Vernon,Willis,52,Huppec Way,Zenapso,SC,10804,9891.36,WHITE,04/30/1917
+77,Eliza,Rogers,24,Hempe Grove,Zikedaj,GA,49021,7589.99,WHITE,07/12/1964
+78,Lina,Mann,64,Gecu Drive,Lugizuzu,MD,15864,5498.46,RED,10/08/2042
+79,Sophia,Hodges,30,Kimog Point,Hifkuwdim,KS,39125,9065.45,RED,08/05/1934
+80,Edith,Nelson,28,Ipiolo Trail,Tezameb,VA,84712,40.72,YELLOW,04/27/2068
+81,Clara,Mendez,44,Guana Highway,Jokefzej,AK,11999,3036.83,GREEN,05/30/1929
+82,Anne,Jenkins,32,Lohpid Key,Ewigajno,NY,06304,6234.41,YELLOW,04/29/1980
+83,Jon,Gardner,37,Waep Grove,Ucutotoc,MT,04307,6933.96,GREEN,04/06/1935
+84,Marvin,Scott,61,Seir Glen,Geferpi,NY,50306,2218.90,BLUE,08/28/1946
+85,Dennis,Barrett,64,Mijow Lane,Mabbedon,ID,28204,7135.14,WHITE,05/19/1984
+86,Betty,Jacobs,33,Kiumo Square,Sagawra,HI,08202,7288.30,GREEN,12/23/2067
+87,Ricky,Rowe,48,Idsi Way,Fahkosnun,MS,35147,5866.95,YELLOW,03/18/2035
+88,Mittie,Medina,56,Jozpum Circle,Koakli,RI,12008,5101.17,WHITE,10/21/2021
+89,Alice,Alexander,60,Richiz Center,Fevsuswur,UT,85934,2259.22,RED,04/30/1915
+90,Landon,Owen,30,Hujcuv Drive,Ihacudol,OH,63628,5782.90,GREEN,08/27/1962
+91,Harriett,Nash,62,Fiip Mill,Ditugdu,ID,59945,9751.22,WHITE,04/27/2070
+92,Fannie,Henderson,27,Hodru Junction,Selohre,LA,59909,5547.41,BLUE,05/11/2053
+93,Harvey,Gutierrez,24,Bapas Place,Ziwgacve,MO,73712,264.09,WHITE,02/23/1930
+94,Elizabeth,Perez,18,Paid Glen,Udapahup,RI,43335,5566.93,WHITE,02/19/2018
+95,Maurice,Andrews,30,Fibcud Ridge,Unujijnov,NH,92161,7806.32,BLUE,01/08/1983
+96,Jacob,Norris,29,Gimmu Avenue,Ekaaboila,DE,07574,3215.34,WHITE,02/11/2032
+97,Georgie,Murray,46,Lisak Junction,Guwulhop,MA,19561,4657.03,RED,05/12/1936
+98,Edward,Thomas,47,Hizha Center,Lubjilcat,SD,02021,2077.84,YELLOW,05/12/1970
+99,Lelia,Franklin,39,Ikjo Key,Hepdaoci,DE,09296,7241.39,YELLOW,02/08/1969
+100,Carl,Olson,23,Pidlim Key,Cohhogvu,MT,16544,4995.17,YELLOW,11/27/1924
