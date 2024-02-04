@@ -13,3 +13,6 @@ If you compile locally, you can easily test it out using
 ```bash
 cargo run -r somefile.csv
 ```
+
+Here is a sample gif of the implementation
+![Demo GIF](images/demo.gif)
