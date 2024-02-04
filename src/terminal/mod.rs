@@ -1,5 +1,3 @@
-pub mod app;
-pub mod tabs;
-pub mod color;
-pub mod utils;
 pub mod table;
+pub mod chart;
+pub mod stats;

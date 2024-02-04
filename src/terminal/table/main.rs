@@ -5,16 +5,16 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{prelude::*, widgets::*};
-use crate::terminal::table::models;
+use crate::terminal::{table::models, stats};
 
 const INFO_TEXT: &str =
-    "(Esc) quit | (↑) move up | (↓) move down | (→) next color | (←) previous color";
+    "(Esc) quit | (↑) move up | (↓) move down | (→) next color | (←) previous color | ↲ for Menu";
 
-use color_eyre:: Result;
+use color_eyre::Result;
 
 
 
-pub fn main() -> Result<(), Box<dyn Error>> {
+pub fn main(file_path: String) -> Result<(), Box<dyn Error>> {
     // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -23,8 +23,8 @@ pub fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // create app and run it
-    let app = models::App::new();
-    let res = run_app(&mut terminal, app);
+    let app = models::App::new(file_path);
+    let _ = run_app(&mut terminal, app);
 
     // restore terminal
     disable_raw_mode()?;
@@ -34,10 +34,6 @@ pub fn main() -> Result<(), Box<dyn Error>> {
         DisableMouseCapture
     )?;
     terminal.show_cursor()?;
-
-    if let Err(err) = res {
-        println!("{err:?}");
-    }
 
     Ok(())
 }
@@ -84,7 +80,6 @@ pub fn ui(f: &mut Frame, app: &mut models::App) {
             Constraint::Percentage(79),
         ])
         .split(outer_layout[1]);
-    
 
     f.render_widget(
         Paragraph::new("CSV Parser").style(Style::new().fg(app.colors.row_fg).bg(app.colors.buffer_bg))
@@ -107,17 +102,123 @@ pub fn ui(f: &mut Frame, app: &mut models::App) {
             render_table(f, app, inner_layout[2]);
             render_scrollbar(f, app, inner_layout[2]);
         },
-        "Visualization" => {},
-        "Statistics" => {},
+        "Visualization" => {
+            let horizontal = Layout::horizontal([Constraint::Ratio(1, 2), Constraint::Ratio(1, 2)]);
+            let [line_chart, scatter]  = horizontal.areas(inner_layout[2]);
+            render_line_chart(f, app, line_chart);
+            render_scatter(f, app, scatter);
+        },
+        "Statistics" => {
+            render_statistics_table(f, app, inner_layout[2]);
+            render_statistics_scrollbar(f, app, inner_layout[2]);
+        },
         "Extras" => {},
         _ => {}
     }
-    
+
     // left side
     render_menu_items(f, app, inner_layout[0]);
     render_menu_scrollbar(f, app, inner_layout[0]);
     // footer
     render_footer(f, app, outer_layout[2]);
+}
+
+
+fn render_statistics_table(f: &mut Frame, app: &mut models::App, area: Rect) {
+    let header_style = Style::default()
+        .fg(app.colors.header_fg)
+        .bg(app.colors.header_bg);
+    let selected_style = Style::default()
+        .add_modifier(Modifier::REVERSED)
+        .fg(app.colors.selected_style_fg);
+
+    let header = app.stats_header
+        .iter()
+        .cloned()
+        .map(Cell::from)
+        .collect::<Row>()
+        .style(header_style)
+        .height(2);
+
+    let mut cols:  Vec<Vec<String>> = vec![
+        vec!["0".to_string(), "mean".to_string()], vec!["1".to_string(), "median".to_string()],
+        vec!["2".to_string(), "range".to_string()], vec!["3".to_string(), "varaince".to_string()],
+        vec!["4".to_string(), "standard deviation".to_string()], vec!["5".to_string(), "percentile 25".to_string()],
+        vec!["6".to_string(), "percentile 50".to_string()], vec!["7".to_string(), "percentile 75".to_string()],
+        vec!["8".to_string(), "skewness".to_string()], vec!["9".to_string(), "kurtosis".to_string()]
+    ];
+
+
+    for el in &app.raw_data {
+        let statistics = stats::Data{
+            data: el.data.clone(),
+        };
+        let (v, std) = statistics.variance_n_std();
+        let (p25, p50, p75) = statistics.percentiles();
+        let stats: Vec<f64> = vec![
+            statistics.mean(),  p50,
+            statistics.range().unwrap(), v,
+            std, p25,  p50,  p75, statistics.skewness(),
+            statistics.kurtosis(),
+        ];
+
+        for (j, stat) in stats.iter().enumerate() {
+            let a = stat.to_string();
+            cols[j].push(a)
+        }
+    }
+
+    let rows = cols.iter().enumerate().map(|(i, data)| {
+        let color = match i % 2 {
+            0 => app.colors.normal_row_color,
+            _ => app.colors.alt_row_color,
+        };
+
+        let item: Vec<&str> = data.iter().map(|f: &String| f.as_str()).collect();
+        item.iter()
+            .cloned()
+            .map(|content| Cell::from(Text::from(format!("\n{}\n", content))))
+            .collect::<Row>()
+            .style(Style::new().fg(app.colors.row_fg).bg(color))
+            .height(2)
+    });
+
+
+    let bar = " ⮞ ";
+    let mut width: Vec<Constraint> = [].to_vec();
+    let space = 100/app.table_header.len();
+    for (_, _) in app.table_header.iter().enumerate() {
+        width.push(Constraint::Percentage(space as u16))
+    }
+    
+    
+    let t = Table::new(rows, width)
+    .header(header)
+    .highlight_style(selected_style)
+    .highlight_symbol(Text::from(vec![
+        "".into(),
+        bar.into(),
+        bar.into(),
+        "".into(),
+    ]))
+    .bg(app.colors.buffer_bg)
+    .highlight_spacing(HighlightSpacing::Always);
+    f.render_stateful_widget(t, area, &mut app.app_state);
+}
+
+
+fn render_statistics_scrollbar(f: &mut Frame, app: &mut models::App, area: Rect) {
+    f.render_stateful_widget(
+        Scrollbar::default()
+            .orientation(ScrollbarOrientation::VerticalRight)
+            .begin_symbol(None)
+            .end_symbol(None),
+        area.inner(&Margin {
+            vertical: 1,
+            horizontal: 1,
+        }),
+        &mut app.scroll_state,
+    );
 }
 
 
@@ -144,6 +245,7 @@ fn render_table(f: &mut Frame, app: &mut models::App, area: Rect) {
         };
 
         let item: Vec<&str> = data.iter().collect();
+        // println!("{:?}", item);
         item.iter()
             .cloned()
             .map(|content| Cell::from(Text::from(format!("\n{}\n", content))))
@@ -151,7 +253,7 @@ fn render_table(f: &mut Frame, app: &mut models::App, area: Rect) {
             .style(Style::new().fg(app.colors.row_fg).bg(color))
             .height(2)
     });
-    let bar = "⮞ ";
+    let bar = " ⮞ ";
     let mut width: Vec<Constraint> = [].to_vec();
     let space = 100/app.table_header.len();
     for (_, _) in app.table_header.iter().enumerate() {
@@ -159,10 +261,7 @@ fn render_table(f: &mut Frame, app: &mut models::App, area: Rect) {
     }
 
 
-    let t = Table::new(
-        rows,
-        width,
-    )
+    let t = Table::new(rows, width)
     .header(header)
     .highlight_style(selected_style)
     .highlight_symbol(Text::from(vec![
@@ -213,22 +312,18 @@ fn render_menu_items(f: &mut Frame, app: &mut models::App, area: Rect) {
             _ => app.colors.alt_row_color,
         };
         let item = [data];
-        // let item = data.ref_array();
         item.iter()
             .cloned()
             .map(|content| Cell::from(Text::from(format!("\n{}\n", content))))
             .collect::<Row>()
-            .style(Style::new().fg(app.colors.row_fg).bg(color))
+            .style(Style::new().fg(app.colors.row_fg).bg(color).bold())
             .height(4)
     });
     let bar = " █ ";
     let t = Table::new(
         rows,
         [
-            // + 1 is for padding.
             Constraint::Length(app.longest_menu_item_len),
-            // Constraint::Min(app.longest_item_lens.1 + 1),
-            // Constraint::Min(app.longest_item_lens.2),
         ],
     )
     .header(header)
@@ -271,4 +366,136 @@ fn render_footer(f: &mut Frame, app: &mut models::App, area: Rect) {
                 .border_type(BorderType::Double),
         );
     f.render_widget(info_footer, area);
+}
+
+
+pub fn render_line_chart(f: &mut Frame, app: &mut models::App, area: Rect) {
+    let mut a: Vec<Dataset<'_>> = [].to_vec();
+    let styles = [
+        Color::Black,
+        Color::Red,
+        Color::Green,
+        Color::Yellow,
+        Color::Blue,
+        Color::Magenta,
+        Color::Cyan,
+        Color::Gray,
+        Color::DarkGray,
+        Color::LightRed,
+        Color::LightGreen,
+        Color::LightYellow,
+        Color::LightBlue,
+        Color::LightMagenta,
+    ];
+    let mut iter = 0;
+    for data in &app.plot_data {
+        let h = &app.grouped_headers[iter];
+        a.push(
+            Dataset::default()
+                .name(format!("plot of {} against {}", h.0, h.1))
+                .marker(symbols::Marker::Braille)
+                .style(Style::default().fg(styles[iter]))
+                .graph_type(GraphType::Line)
+                .data(&data)
+            );
+            iter += 1;
+    }
+
+    let ((min_x, min_y), (max_x, max_y)) = app.plot_data.iter().flat_map(|v| v.iter()).fold(
+        ((f64::INFINITY, f64::INFINITY), (f64::NEG_INFINITY, f64::NEG_INFINITY)),
+        |((min_x, min_y), (max_x, max_y)), &(x, y)| {
+            ((min_x.min(x), min_y.min(y)), (max_x.max(x), max_y.max(y)))
+        },
+    );
+
+    let chart = Chart::new(a)
+        .block(
+            Block::default()
+                .title(
+                    block::Title::default()
+                        .content("Line chart".cyan().bold())
+                        .alignment(Alignment::Center),
+                )
+                .borders(Borders::ALL),
+        )
+        .x_axis(
+            Axis::default()
+                .title("X Axis")
+                .style(Style::default().gray())
+                .bounds([min_x-10.0, max_x+10.0])
+                .labels(vec![format!("{min_x}").into(), format!("{max_x}").into()]),
+        )
+        .y_axis(
+            Axis::default()
+                .title("Y Axis")
+                .style(Style::default().gray())
+                .bounds([min_y-10.0, max_y+10.0])
+                .labels(vec![format!("{min_y}").into(), format!("{max_y}").into()]),
+        )
+        .legend_position(Some(LegendPosition::TopLeft))
+        .hidden_legend_constraints((Constraint::Ratio(1, 2), Constraint::Ratio(1, 2)));
+
+    f.render_widget(chart, area)
+}
+
+pub fn render_scatter(f: &mut Frame, app: &mut models::App, area: Rect) {
+    let styles = [
+        Style::new().yellow(),
+        Style::new().green(),
+        Style::new().blue(),
+        Style::new().gray(),
+        Style::new().cyan(),
+        Style::new().yellow(),
+        Style::new().green(),
+        Style::new().yellow(),
+        Style::new().green(),
+    ];
+
+    let mut a: Vec<Dataset<'_>> = [].to_vec();
+    let mut iter = 0;
+    for data in &app.plot_data {
+        let h = &app.grouped_headers[iter];
+        a.push(
+            Dataset::default()
+            .name(format!("plot of {} against {}", h.0, h.1))
+                .marker(Marker::Dot)
+                .graph_type(GraphType::Scatter)
+                .style(styles[iter])
+                .data(&data)
+        );
+        iter += 1;
+    }
+
+    let ((min_x, min_y), (max_x, max_y)) = app.plot_data.iter().flat_map(|v| v.iter()).fold(
+        ((f64::INFINITY, f64::INFINITY), (f64::NEG_INFINITY, f64::NEG_INFINITY)),
+        |((min_x, min_y), (max_x, max_y)), &(x, y)| {
+            ((min_x.min(x), min_y.min(y)), (max_x.max(x), max_y.max(y)))
+        },
+    );
+
+    let chart = Chart::new(a)
+        .block(
+            Block::new().borders(Borders::all()).title(
+                block::Title::default()
+                    .content("Scatter chart".cyan().bold())
+                    .alignment(Alignment::Center),
+            ),
+        )
+        .x_axis(
+            Axis::default()
+                .title("Year")
+                .bounds([min_x-10.0, max_x+10.0])
+                .style(Style::default().fg(Color::Gray))
+                .labels(vec![format!("{min_x}").into(), format!("{max_x}").into()]),
+        )
+        .y_axis(
+            Axis::default()
+                .title("Cost")
+                .bounds([min_y-10.0, max_y+10.0])
+                .style(Style::default().fg(Color::Gray))
+                .labels(vec![format!("{min_y}").into(), format!("{max_y}").into()]),
+        )
+        .hidden_legend_constraints((Constraint::Ratio(1, 2), Constraint::Ratio(1, 2)));
+
+    f.render_widget(chart, area);
 }
