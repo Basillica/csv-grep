@@ -1,6 +1,6 @@
 use style::palette::tailwind;
 use ratatui::{prelude::*, widgets::*};
-use crate::terminal::table::utils::*;
+use crate::tui::utils::*;
 use csv::{ReaderBuilder, StringRecord};
 use std::fs::File;
 
